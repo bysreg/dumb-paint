@@ -51,6 +51,7 @@
 
 typedef unsigned char  byte;
 typedef unsigned short word;
+
 typedef struct {
 	float x;
 	float y;
@@ -60,6 +61,16 @@ typedef struct {
 	int x;
 	int y;
 } point;
+
+typedef struct {
+	point p1;
+	point p2;
+} line;
+
+typedef struct {
+	line* lines;
+	int lineCount;	
+} letter;
 
 typedef float Matrix3x3[3][3];
 
@@ -78,7 +89,15 @@ typedef struct tagOBJECT              /* the structure for a moving object in 2d
   byte width,height;
 } OBJECT;
 
+extern byte *VGA;        /* this points to video memory. */
+extern word *my_clock;    /* this points to the 18.2hz system clock. */
+extern byte *doubleBuffer;
+extern byte *canvas; //data canvas sebenarnya
+extern letter* dict; // kamus huruf
+extern Matrix3x3 _transmat; // matrix transformasi
+
 void initDoubleBuffer();
+void loadFontDb();
 void set_mode(byte mode);
 void drawPixel(int x, int y, byte color);
 byte getColor(int x, int y);
@@ -94,6 +113,7 @@ void translate2(int tx, int ty, Matrix3x3 mat);
 void scale2(float sx, float sy, vec2 refPt, Matrix3x3 mat);
 void rotate2(float a, vec2 refPt, Matrix3x3 mat);
 void transformPoints2(int npts, vec2 *pts, Matrix3x3 mat); 
+void transformPoint2(int *x, int *y, Matrix3x3 mat);
 vec2 calcTransformPoint2(vec2 p, Matrix3x3 mat);
 void printMatrix3x3(Matrix3x3 m);
 void floodFill(int x, int y, byte target_color, byte replacement_color);
@@ -102,9 +122,9 @@ void copyPolygon(vec2 *p1, vec2 *p2, int n) ;
 void drawPolygon(vec2 *points, int n, byte color);
 void drawRect(int x1, int y1, int x2, int y2, byte lineColor);
 void drawBitmap(BITMAP bmp, int xscreen, int yscreen);
-
-extern byte *VGA;        /* this points to video memory. */
-extern word *my_clock;    /* this points to the 18.2hz system clock. */
-extern byte *doubleBuffer;
+void drawLetter(int letterIndex, int x, int y, byte color);
+void drawString(const char* s, int x, int y, int space, byte color);
+void transformCanvas();
+void zoom(float scale);
 
 #endif

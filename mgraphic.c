@@ -5,22 +5,23 @@ int main() {
 	word x,y;	
 	BITMAP bmp;	
 	vec2 polypoints[3];	
-	int i, j = 0;
+	int i, j = 0;	
 	
 	initDoubleBuffer();
+	loadFontDb();
 	
 	load_bmp("balls.bmp",&bmp);
 		
-	set_mode(VGA_256_COLOR_MODE);      //  siap - siap gambar	
+	set_mode(VGA_256_COLOR_MODE);      //  siap - siap gambar		
 	
 	// TEST 1. gambar lingkaran
-	memset(doubleBuffer,0,SCREEN_SIZE);
+	memset(canvas,0,SCREEN_SIZE);
 	drawCircle(SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2, 25, 2);
 	show_buffer(doubleBuffer); // show the buffer			
 	getch();
 	
 	// TEST 2. gambar garis
-	memset(doubleBuffer,0,SCREEN_SIZE);
+	memset(canvas,0,SCREEN_SIZE);
 	for (i=0;i<SCREEN_HEIGHT;i++) {
 		for (j=0;j<SCREEN_WIDTH;j++) {
 			drawPixel(j, i, 15);
@@ -32,7 +33,7 @@ int main() {
 	getch();
 	
 	// TEST 3. gambar polygon
-	memset(doubleBuffer,0,SCREEN_SIZE);	
+	memset(canvas,0,SCREEN_SIZE);	
 	polypoints[0].x = 0;
 	polypoints[0].y = 0;
 	polypoints[1].x = 20;
@@ -42,15 +43,27 @@ int main() {
 	drawPolygon(polypoints, 3, 25);			
 	show_buffer(doubleBuffer); // show the buffer			
 	getch();
-	
+		
 	// TEST 4. fill
-	memset(doubleBuffer,0,SCREEN_SIZE);			
+	memset(canvas,0,SCREEN_SIZE);			
 	drawCircle(30,30, 7, 14);	
 	floodFill(30, 30, getColor(30, 30), 14);	
 	show_buffer(doubleBuffer); // show the buffer			
 	getch();
 	
+	// TEST 5. gambar font
+	memset(canvas,0,SCREEN_SIZE);			
+	drawString("ababa", 20, 20, 30, 14);
+	show_buffer(doubleBuffer); // show the buffer			
+	getch();	
+	
+	// TEST 6. zoom in zoom out	
+	zoom(1.5);
+	show_buffer(doubleBuffer); // show the buffer			
+	getch();
+	
 	// TEST 5. gambar bitmap
+	zoom(1);
 	set_palette(bmp.palette);
 	memset(doubleBuffer,0,SCREEN_SIZE);
 	drawBitmap(bmp, 0, 0);
@@ -58,6 +71,7 @@ int main() {
 	getch();
 		
 	free(doubleBuffer);                // free up memory used
+	free(dict); // jangan lupa nge-free heap
 	set_mode(TEXT_MODE);	
 	
 	return 0;
