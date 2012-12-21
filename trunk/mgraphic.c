@@ -1,34 +1,64 @@
 #include "graphic.h"
 
 int main() {
-	char c = 'a';
+	
+	word x,y;	
+	BITMAP bmp;	
+	vec2 polypoints[3];	
+	int i, j = 0;
 	
 	initDoubleBuffer();
 	
-	getch();
-	//***MULAI GAMBAR*****
-	while(1) {
-		set_mode(VGA_256_COLOR_MODE);    				
-				
-			
-		//rasterFill(bgColor, planeLineColor, planeInfo[planeInfoI].pos.x, planeInfo[planeInfoI].pos.x + 20, planeInfo[planeInfoI].pos.y, planeInfo[planeInfoI].pos.y + 10);
-		//rasterFill(planeFillColor, planeLineColor, 0, 0, 100, 100);
+	load_bmp("balls.bmp",&bmp);
 		
-		drawRect(0,0, 100,100, 0, 1);
-		
-		while ((inp(INPUT_STATUS_1) & VRETRACE));
-		while (!(inp(INPUT_STATUS_1) & VRETRACE));
-		memcpy(VGA,doubleBuffer,320*200);
-		
-		c = getch();		
-		if(c=='c') 
-			break;		
-	}	
+	set_mode(VGA_256_COLOR_MODE);      //  siap - siap gambar	
 	
-	//***SELESAI GAMBAR****
-	set_mode(TEXT_MODE);    		
-		
+	// TEST 1. gambar lingkaran
+	memset(doubleBuffer,0,SCREEN_SIZE);
+	drawCircle(SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2, 25, 2);
+	show_buffer(doubleBuffer); // show the buffer			
 	getch();
+	
+	// TEST 2. gambar garis
+	memset(doubleBuffer,0,SCREEN_SIZE);
+	for (i=0;i<SCREEN_HEIGHT;i++) {
+		for (j=0;j<SCREEN_WIDTH;j++) {
+			drawPixel(j, i, 15);
+		}
+	}
+	drawLine(1,1,100, 100, 25);
+	drawLine(2,2,101, 101, 25);
+	show_buffer(doubleBuffer); // show the buffer			
+	getch();
+	
+	// TEST 3. gambar polygon
+	memset(doubleBuffer,0,SCREEN_SIZE);	
+	polypoints[0].x = 0;
+	polypoints[0].y = 0;
+	polypoints[1].x = 20;
+	polypoints[1].y = 0;
+	polypoints[2].x = 10;
+	polypoints[2].y = 10;	
+	drawPolygon(polypoints, 3, 25);			
+	show_buffer(doubleBuffer); // show the buffer			
+	getch();
+	
+	// TEST 4. fill
+	memset(doubleBuffer,0,SCREEN_SIZE);			
+	drawCircle(30,30, 7, 14);	
+	floodFill(30, 30, getColor(30, 30), 14);	
+	show_buffer(doubleBuffer); // show the buffer			
+	getch();
+	
+	// TEST 5. gambar bitmap
+	set_palette(bmp.palette);
+	memset(doubleBuffer,0,SCREEN_SIZE);
+	drawBitmap(bmp, 0, 0);
+	show_buffer(doubleBuffer); // show the buffer			
+	getch();
+		
+	free(doubleBuffer);                // free up memory used
+	set_mode(TEXT_MODE);	
 	
 	return 0;
 }

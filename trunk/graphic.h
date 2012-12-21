@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <dos.h>
 #include <mem.h>
+#include "queue.h"
 
 
 #define VIDEO_INT           0x10      /* the BIOS video interrupt. */
@@ -43,8 +44,6 @@
 #define SCREEN_SIZE         (word)(SCREEN_WIDTH*SCREEN_HEIGHT)
 #define NUM_COLORS          256       /* number of colors in mode 0x13 */
 
-#define ANIMATION_FRAMES    24
-#define TOTAL_FRAMES        140
 #define VERTICAL_RETRACE              /* comment out this line for more
                                          accurate timing */
 
@@ -87,6 +86,7 @@ void set_palette(byte *palette);
 void fskip(FILE *fp, int num_bytes);
 void load_bmp(char *file,BITMAP *b);
 void drawLine(int x0, int y0, int x1, int y1, byte color);
+void drawCircle(int xCenter, int yCenter, int radius, byte color); 
 float convertAngleToRadian(float angle);
 void matrix3x3SetIdentity(Matrix3x3 m); 
 void matrix3x3PreMultiply(Matrix3x3 a, Matrix3x3 b);
@@ -96,10 +96,12 @@ void rotate2(float a, vec2 refPt, Matrix3x3 mat);
 void transformPoints2(int npts, vec2 *pts, Matrix3x3 mat); 
 vec2 calcTransformPoint2(vec2 p, Matrix3x3 mat);
 void printMatrix3x3(Matrix3x3 m);
+void floodFill(int x, int y, byte target_color, byte replacement_color);
 void rasterFill(byte color, byte mark, int xAwal, int xAkhir, int yAwal, int yAkhir);
 void copyPolygon(vec2 *p1, vec2 *p2, int n) ;
 void drawPolygon(vec2 *points, int n, byte color);
-void drawRect(int x1, int y1, int x2, int y2, byte lineColor, byte fillColor);
+void drawRect(int x1, int y1, int x2, int y2, byte lineColor);
+void drawBitmap(BITMAP bmp, int xscreen, int yscreen);
 
 extern byte *VGA;        /* this points to video memory. */
 extern word *my_clock;    /* this points to the 18.2hz system clock. */
