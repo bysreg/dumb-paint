@@ -21,29 +21,21 @@ void set_mode(byte mode) {
 }
 
 void drawPixel(int x, int y, byte color) {
-	//doubleBuffer[(y<<8) + (y<<6) + x] = color;
-	VGA[y*SCREEN_WIDTH+x]=color;
+	doubleBuffer[(y<<8) + (y<<6) + x] = color;	
 }
 
 byte getColor(int x, int y) {
-	//return (doubleBuffer[(y<<8)+(y<<6)+x]);
-	return VGA[y*SCREEN_WIDTH+x];
+	return (doubleBuffer[(y<<8)+(y<<6)+x]);	
 }
 
-/**************************************************************************
- *  fskip                                                                 *
- *     Skips bytes in a file.                                             *
- **************************************************************************/
-
-void fskip(FILE *fp, int num_bytes)
-{
+//skip byte di file
+void fskip(FILE *fp, int num_bytes) {
    int i;
    for (i=0; i<num_bytes; i++)
       fgetc(fp);
 }
 
-void set_palette(byte *palette)
-{
+void set_palette(byte *palette) {
   int i;
 
   outp(PALETTE_INDEX,0);              /* tell the VGA that palette data
@@ -52,8 +44,7 @@ void set_palette(byte *palette)
     outp(PALETTE_DATA,palette[i]);    /* write the data */
 }
 
-void load_bmp(char *file,BITMAP *b)
-{
+void load_bmp(char *file,BITMAP *b) {
   FILE *fp;
   long index;
   word num_colors;
@@ -144,6 +135,39 @@ void drawLine(int x0, int y0, int x1, int y1, byte color) {
 			y = y + ystep;
 			error = error + deltax;
 		}
+	}
+}
+
+void drawCircle(int xCenter, int yCenter, int radius, byte color) 
+{
+	int x = 0;
+	int y = radius;
+	int p = 1 - radius;
+	int ddF_x = 1;
+	int ddF_y = -2 * radius;
+	
+	drawPixel(xCenter + radius, yCenter, color);
+	drawPixel(xCenter - radius, yCenter, color);
+	drawPixel(xCenter, yCenter + radius, color);
+	drawPixel(xCenter, yCenter - radius, color);
+	
+	while(x < y) {
+		if(p>=0) {
+			y--;
+			ddF_y += 2;			
+			p += ddF_y;
+		}
+		x++;
+		ddF_x += 2;
+		p += ddF_x;
+		drawPixel(xCenter + x, yCenter + y, color);
+		drawPixel(xCenter + x, yCenter - y, color);
+		drawPixel(xCenter - x, yCenter + y, color);
+		drawPixel(xCenter - x, yCenter - y, color);
+		drawPixel(xCenter + y, yCenter + x, color);
+		drawPixel(xCenter + y, yCenter - x, color);
+		drawPixel(xCenter - y, yCenter + x, color);
+		drawPixel(xCenter - y, yCenter - x, color);
 	}
 }
 
@@ -240,6 +264,34 @@ void printMatrix3x3(Matrix3x3 m) {
 	}	
 }	
 
+void floodFill(int x, int y, byte target_color, byte replacement_color) {
+	byte color = getColor(x, y);		
+	byte color_1 = getColor(x-1, y);
+	byte color_2 = getColor(x, y-1);
+	byte color_3 = getColor(x+1, y);
+	byte color_4 = getColor(x, y+1);
+	//printf("%d %d %d", x, y, color);
+		//getch();
+	if(color == target_color) {						
+		//printf(" lanjut %d \n", (y<<8) + (y<<6) + x);
+		drawPixel(x, y, replacement_color);			
+		
+		if(color_1 == target_color) 
+		floodFill(x-1, y, target_color, replacement_color);
+		
+		if(color_2 == target_color) 
+		floodFill(x, y - 1, target_color, replacement_color);
+		
+		if(color_3 == target_color) 
+		floodFill(x + 1, y , target_color, replacement_color);
+		
+		if(color_4 == target_color) 
+		floodFill(x, y + 1, target_color, replacement_color);		
+	}else{
+		//printf("\n");
+	}
+}
+
 void rasterFill(byte color, byte mark, int xAwal, int yAwal, int xAkhir, int yAkhir) {
 
 	byte pivot;	
@@ -302,7 +354,7 @@ void drawPolygon(vec2 *points, int n, byte color) {
 	}
 }
 
-void drawRect(int x1, int y1, int x2, int y2, byte lineColor, byte fillColor) {
+void drawRect(int x1, int y1, int x2, int y2, byte lineColor) {
 	int x3 = x2;
 	int y3 = y1;
 	int x4 = x1;
@@ -313,7 +365,19 @@ void drawRect(int x1, int y1, int x2, int y2, byte lineColor, byte fillColor) {
 	drawLine(x2, y2, x4, y4, lineColor);
 	drawLine(x4, y4, x1, y1, lineColor);	
 	
-	rasterFill(fillColor, lineColor, x1, y1, x2, y2);
+	//rasterFill(fillColor, lineColor, x1, y1, x2, y2);
+}
+
+void drawBitmap(BITMAP bmp, int xscreen, int yscreen) {		
+	int x, y = 0;
+	
+	for(y=0;y<bmp.height;y++) {							
+		for(x=0;x<bmp.width;x++) {				  
+			if (bmp.data[y*bmp.width+x]!=0) {						
+				drawPixel(xscreen + x, yscreen + y, bmp.data[y*bmp.width+x]);						
+			}
+		}
+	}	
 }
 
 void show_buffer(byte *buffer) {
