@@ -407,6 +407,13 @@ void drawPolygon(vec2 *points, int n, byte color) {
 	}
 }
 
+void drawPolygonp(point *points, int n, byte color) {
+	int i=0;
+	for(i=0;i<n;i++) {
+		drawLine(points[i].x, points[i].y, points[(i+1) % n].x, points[(i+1) % n].y, color);
+	}
+}
+
 void drawRect(int x1, int y1, int x2, int y2, byte lineColor) {
 	int x3 = x2;
 	int y3 = y1;
@@ -433,16 +440,15 @@ void drawBitmap(BITMAP bmp, int xscreen, int yscreen) {
 	}	
 }
 
-void show_buffer(byte *buffer) {
+void show_buffer() {
   #ifdef VERTICAL_RETRACE
     while ((inp(INPUT_STATUS_1) & VRETRACE));
     while (!(inp(INPUT_STATUS_1) & VRETRACE));
   #endif
   
-  memset(buffer,0,SCREEN_SIZE);
+  memset(doubleBuffer,0,SCREEN_SIZE);
   transformCanvas();
-  memcpy(VGA,buffer,SCREEN_SIZE);
-  //memcpy(VGA,canvas,SCREEN_SIZE);
+  memcpy(VGA,doubleBuffer,SCREEN_SIZE);  
 }
 
 void transformPoint2(int *x, int *y, Matrix3x3 mat) {
@@ -498,4 +504,40 @@ void zoom(float scale) {
 	
 	matrix3x3SetIdentity(_transmat);		
 	scale2(scale, scale, origin, _transmat);
+}
+
+void createBezier4(point *points, point p1, point p2, point p3, point p4, float mu) {	
+	point p;
+	int count = 0;
+	float i=0;
+	
+	while(i<=1) {
+		p = bezier4(p1,p2,p3,p4,i);
+		points[count] = p;
+		//printf("%f %d %d %d\n", i, count, p.x, p.y);
+		i+=mu;
+		count++;
+	}
+}
+
+point bezier4(point p1, point p2, point p3, point p4, float mu){
+	float mum1,mum13,mu3;
+	point p;
+
+	mum1 = 1 - mu;
+	mum13 = mum1 * mum1 * mum1;
+	mu3 = mu * mu * mu;
+
+	p.x = mum13*p1.x + 3*mu*mum1*mum1*p2.x + 3*mu*mu*mum1*p3.x + mu3*p4.x;
+	p.y = mum13*p1.y + 3*mu*mum1*mum1*p2.y + 3*mu*mu*mum1*p3.y + mu3*p4.y;  
+
+	return p;
+}
+
+void drawPoints(point *points, int len, byte color) {
+	int i=0;
+	
+	for(i=0;i<len;i++) {
+		drawPixel(points[i].x, points[i].y, color);
+	}
 }

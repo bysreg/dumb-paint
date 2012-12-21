@@ -105,6 +105,7 @@ void set_palette(byte *palette);
 void fskip(FILE *fp, int num_bytes);
 void load_bmp(char *file,BITMAP *b);
 void drawLine(int x0, int y0, int x1, int y1, byte color);
+void drawPoints(point *points, int len, byte color);
 void drawCircle(int xCenter, int yCenter, int radius, byte color); 
 float convertAngleToRadian(float angle);
 void matrix3x3SetIdentity(Matrix3x3 m); 
@@ -120,11 +121,14 @@ void floodFill(int x, int y, byte target_color, byte replacement_color);
 void rasterFill(byte color, byte mark, int xAwal, int xAkhir, int yAwal, int yAkhir);
 void copyPolygon(vec2 *p1, vec2 *p2, int n) ;
 void drawPolygon(vec2 *points, int n, byte color);
+void drawPolygonp(point *points, int n, byte color);
 void drawRect(int x1, int y1, int x2, int y2, byte lineColor);
 void drawBitmap(BITMAP bmp, int xscreen, int yscreen);
 void drawLetter(int letterIndex, int x, int y, byte color);
 void drawString(const char* s, int x, int y, int space, byte color);
 void transformCanvas();
 void zoom(float scale);
+void createBezier4(point *points, point p1, point p2, point p3, point p4, float mu);
+point bezier4(point p1, point p2, point p3, point p4, float mu);
 
 #endif
