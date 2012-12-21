@@ -46,11 +46,14 @@
 
 #define VERTICAL_RETRACE              /* comment out this line for more
                                          accurate timing */
-
+#define INPUT_STATUS_1      0x03da
+#define INPUT_STATUS        0x03da
+										 
 #define PI 3.14
 
 typedef unsigned char  byte;
 typedef unsigned short word;
+typedef long fixed16_16;
 
 typedef struct {
 	float x;
@@ -95,7 +98,9 @@ extern byte *doubleBuffer;
 extern byte *canvas; //data canvas sebenarnya
 extern letter* dict; // kamus huruf
 extern Matrix3x3 _transmat; // matrix transformasi
+extern fixed16_16 SIN_ACOS[1024];		
 
+point Point(int x, int y);
 void initDoubleBuffer();
 void loadFontDb();
 void set_mode(byte mode);
@@ -130,5 +135,11 @@ void transformCanvas();
 void zoom(float scale);
 void createBezier4(point *points, point p1, point p2, point p3, point p4, float mu);
 point bezier4(point p1, point p2, point p3, point p4, float mu);
+void fillRect(point P0, point P1, byte color); 
+void drawLinep(point P0, point P1, byte color);
+void drawRectp(point P0, point P1, byte color);
+void drawCirclep(point P, int radius, byte color);
+void circleReference();
+void wait_for_retrace(void) ;
 
 #endif

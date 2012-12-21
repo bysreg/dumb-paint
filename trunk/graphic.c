@@ -2,11 +2,18 @@
 
 byte *VGA=(byte *)0xA0000000L;        /* this points to video memory. */
 word *my_clock=(word *)0x0000046C;    /* this points to the 18.2hz system clock. */
-
+fixed16_16 	SIN_ACOS[1024];
 byte *doubleBuffer;
 byte *canvas;
 letter* dict; // kamus huruf
 Matrix3x3 _transmat;
+
+point Point(int x, int y) {
+	point P;
+	P.x=x;
+	P.y=y;
+	return P;
+}
 
 void initDoubleBuffer() {
 	doubleBuffer = (byte *) malloc(320 * 200);	
@@ -536,4 +543,58 @@ void drawPoints(point *points, int len, byte color) {
 	for(i=0;i<len;i++) {
 		drawPixel(points[i].x, points[i].y, color);
 	}
+}
+
+void fillRect(point P0, point P1, byte color) {
+	int x, y;
+	for(y=P0.y; y<=P1.y; y++) {
+		for(x=P0.x; x<=P1.x; x++) {
+			drawPixel(x,y,color);
+		}
+	}
+}
+
+void fillCircle(point P, int radius, byte color) {
+	fixed16_16 	n=0,
+				invradius=(1/(float)radius)*0x10000L;
+	int 		dx=0,
+				dy=radius-1,i;	
+
+	while (dx<=dy) {		
+		for(i=dy;i>=dx;i--,dy--) {
+			drawPixel(P.x-dx, P.y+i,  color);	/* octant 0 */
+			drawPixel(P.x-dy, P.y+dx, color);	/* octant 1 */
+			drawPixel(P.x-dy, P.y-dx, color);	/* octant 2 */
+			drawPixel(P.x-dx, P.y-i,  color);	/* octant 3 */
+			drawPixel(P.x+dx, P.y-i,  color);	/* octant 4 */
+			drawPixel(P.x+dy, P.y-dx, color);	/* octant 5 */
+			drawPixel(P.x+dy, P.y+dx, color);	/* octant 6 */
+			drawPixel(P.x+dx, P.y+i,  color);	/* octant 7 */
+		}
+		dx++;
+		n+=invradius;
+		dy = (int)((radius * SIN_ACOS[(int)(n>>6)]) >> 16);
+	}
+}
+
+void drawLinep(point P0, point P1, byte color) {
+	drawLine(P0.x, P0.y, P1.x, P1.y, color);
+}
+
+void drawRectp(point P0, point P1, byte color) {
+	drawRect(P0.x, P0.y, P1.x, P1.y, color);
+}
+
+void drawCirclep(point P, int radius, byte color) {
+	drawCircle(P.x, P.y, radius, color);
+}
+
+void circleReference() {
+	int i;
+	for(i=0;i<1024;i++) SIN_ACOS[i]=sin(acos((float)i/1024))*0x10000L;
+}
+
+void wait_for_retrace(void) {
+    while  ((inp(INPUT_STATUS) & VRETRACE));
+    while (!(inp(INPUT_STATUS) & VRETRACE));
 }
