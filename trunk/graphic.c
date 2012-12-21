@@ -4,14 +4,65 @@ byte *VGA=(byte *)0xA0000000L;        /* this points to video memory. */
 word *my_clock=(word *)0x0000046C;    /* this points to the 18.2hz system clock. */
 
 byte *doubleBuffer;
+byte *canvas;
+letter* dict; // kamus huruf
+Matrix3x3 _transmat;
+
 
 void initDoubleBuffer() {
-	doubleBuffer = (byte *) malloc(320 * 200);
+	doubleBuffer = (byte *) malloc(320 * 200);	
 	if(doubleBuffer == NULL) {
 		printf("error");
 		exit(1);
 	}
+	canvas = (byte *) malloc(SCREEN_WIDTH * SCREEN_HEIGHT);
+	if(canvas == NULL) {
+		printf("error");
+		exit(1);
+	}
+	matrix3x3SetIdentity(_transmat);
+	memset(doubleBuffer,0,SCREEN_SIZE);	
+	memset(canvas,0,SCREEN_SIZE);	
 }	
+
+void loadFontDb() {	
+	char buffer[1000];
+	int n, i, lineCount, j;	
+	int x0, y0, x1, y1;
+	FILE *fp;
+	
+	fp = fopen("db.txt", "r");
+	if (fp == NULL) {
+		perror("Error opening file");
+	} else {				
+		fgets(buffer, 100, fp);
+		sscanf(buffer, "%d", &n);		
+		dict = (letter*) malloc(sizeof(letter) * n);			
+		
+		for(i=0;i < n;i++) {			
+			letter let;
+			
+			fgets(buffer , 100 , fp); //baris pertama deskripsi huruf dihiraukan			
+			fgets(buffer , 100 , fp); //baris kedua menyatakan jumlah garis yang dibutuhkan			
+			sscanf(buffer, "%d", &lineCount);			
+			let.lineCount = lineCount;
+			let.lines = (line*) malloc(sizeof(line) * lineCount);									
+			for(j=0;j<lineCount;j++) {
+				point p1, p2;
+				line l;
+				fgets(buffer , 100 , fp); //tiap baris berikutnya menyatakan dua titik yang membentuk garis (x0 y0 x1 y1)				
+				sscanf(buffer, "%d %d %d %d", &x0, &y0, &x1, &y1);								
+				p1.x = x0;p1.y = y0;
+				p2.x = x1, p2.y = y1;								
+				l.p1 = p1;l.p2 = p2;
+				let.lines[j] = l;
+			}
+			dict[i] = let;
+		}		
+		
+		fclose (fp);
+	}
+}
 
 void set_mode(byte mode) {
 	union REGS regs;
@@ -21,11 +72,13 @@ void set_mode(byte mode) {
 }
 
 void drawPixel(int x, int y, byte color) {
-	doubleBuffer[(y<<8) + (y<<6) + x] = color;	
+	canvas[(y<<8) + (y<<6) + x] = color;	
+	//doubleBuffer[(y<<8) + (y<<6) + x] = color;	
 }
 
 byte getColor(int x, int y) {
-	return (doubleBuffer[(y<<8)+(y<<6)+x]);	
+	return (canvas[(y<<8)+(y<<6)+x]);	
+	//return (doubleBuffer[(y<<8)+(y<<6)+x]);	
 }
 
 //skip byte di file
@@ -385,5 +438,64 @@ void show_buffer(byte *buffer) {
     while ((inp(INPUT_STATUS_1) & VRETRACE));
     while (!(inp(INPUT_STATUS_1) & VRETRACE));
   #endif
+  
+  memset(buffer,0,SCREEN_SIZE);
+  transformCanvas();
   memcpy(VGA,buffer,SCREEN_SIZE);
+  //memcpy(VGA,canvas,SCREEN_SIZE);
+}
+
+void transformPoint2(int *x, int *y, Matrix3x3 mat) {
+	int tx, ty = 0;
+	
+	tx = *x;
+	ty = *y;
+	*x = mat[0][0] * tx + mat[0][1] * ty + mat[0][2];
+	*y = mat[1][0] * tx + mat[1][1] * ty + mat[1][2];
+}
+
+void transformCanvas() {
+	int x, y, xbuf, ybuf = 0;
+	
+	for(y=0;y<SCREEN_HEIGHT;y++) {
+		for(x=0;x<SCREEN_WIDTH;x++) {
+			xbuf = x;
+			ybuf = y;
+			transformPoint2(&xbuf, &ybuf, _transmat);
+			//if(_transmat[0][0]==2) {
+				//printf("%d %d %d %d\n", x, y, xbuf, ybuf);
+			//}	
+			if(xbuf < SCREEN_WIDTH && ybuf < SCREEN_HEIGHT) {
+				doubleBuffer[(ybuf<<8) + (ybuf<<6) + xbuf] = getColor(x, y);	
+			}
+		}
+	}
+}
+
+void drawLetter(int letterIndex, int x, int y, byte color) {
+	letter l = dict[letterIndex];
+	int i;
+	for(i=0;i<l.lineCount;i++) {
+		drawLine(l.lines[i].p1.x + x, l.lines[i].p1.y + y, l.lines[i].p2.x + x, l.lines[i].p2.y + y, color);		
+	}
+}
+
+//hanya menerima huruf kecil, dan huruf tersebut harus terdaftar di kamus
+void drawString(const char* s, int x, int y, int space, byte color) {
+	int i, letterIndex, curX;
+	int len = strlen(s);
+	
+	curX = x;
+	for(i=0;i < len;i++) {		
+		letterIndex = s[i] - 'a';
+		drawLetter(letterIndex, curX, y, color);
+		curX += space;
+	}	
+}
+
+void zoom(float scale) {	
+	vec2 origin = {0,0};	
+	
+	matrix3x3SetIdentity(_transmat);		
+	scale2(scale, scale, origin, _transmat);
 }
