@@ -1,7 +1,8 @@
-#include "graphic.h"
 #include "mouse.h"
 
-int main() {								
+
+int main() {
+	
 	typedef enum {line, rect, circle, fill} MODE;
 	
 	BITMAP 		bmp;
@@ -11,6 +12,7 @@ int main() {
 				*mouse_wait,
 				*mouse_new=NULL;
 	BUTTON 		*button[NUM_BUTTONS];
+	
 	// Drawing mode handler
 	int			color;
 	point		P1={0,0},
@@ -20,14 +22,18 @@ int main() {
 				draw_circle_mode=0,
 				draw_rect_mode=0;
 	word 		redraw;
+	
 	// Mouse coordinate interrupts handler
+	
 	sword 		dx=0,
 				dy=0,
 				new_x,
 				new_y;
+				
 	// Mouse button interrupts handler			
 	word 		press,
 				release;
+				
 	// Command parsing
 	char 		command[10],
 				param[20];
@@ -36,16 +42,19 @@ int main() {
 				radius,
 				done=0,
 				x,y;
+				
 	word 	last_time;
 	int 	preview_x,
 			preview_y;
 			
 	MODE 	CURRENT_MODE;
+	
 	ElmtList *Temp;
+	
 	ListObject LIST_OBJECT;
 	Object OBJECT;
-	
-	/************************************************************************************/
+		
+		
 	system("cls");
 	// printf("##################################################\n");
 	// printf("#                  16-BIT PAINT                  #\n");
@@ -65,10 +74,13 @@ int main() {
 	// }
 		
 	//Inisialisasi Variable dasar
+	
 	CURRENT_MODE = line;
 	color	= WHITE;
 	MakeEmpty(&LIST_OBJECT);
 	
+	
+	///*
 	for (i=0; i<NUM_MOUSEBITMAPS; i++) {
 		if ((mb[i] = (MOUSEBITMAP *) malloc(sizeof(MOUSEBITMAP))) == NULL) {
 			printf("Error allocating memory for bitmap.\n");
@@ -99,14 +111,19 @@ int main() {
 		printf("Mouse not found.\n");
 		exit(1);
 	}
-
+	
+	
+	
 	load_bmp("images.bmp",&bmp);
 	circleReference();
-	makeBuffer();
-	set_mode(VGA_256_COLOR_MODE);       /* set the video mode. */
+	
+	initDoubleBuffer();
+	loadFontDb();
+	
+	set_mode(VGA_256_COLOR_MODE);      
 	// makeLayout();
 	
-	for(i=0;i<NUM_MOUSEBITMAPS;i++) {   /* copy mouse pointers */
+	for(i=0;i<NUM_MOUSEBITMAPS;i++) {  
 		for(y=0;y<MOUSE_HEIGHT;y++) {
 			for(x=0;x<MOUSE_WIDTH;x++) {
 				mb[i]->data[x+y*MOUSE_WIDTH] = bmp.data[i*MOUSE_WIDTH+x+y*bmp.width];
@@ -122,7 +139,7 @@ int main() {
 	mb[0]->hot_x = 7;
 	mb[0]->hot_y = 2;
 	
-	/* copy button bitmaps */
+	
 	for(i=0;i<NUM_BUTTONS;i++) {
 		for(j=0;j<BUTTON_BITMAPS;j++) {
 			for(y=0;y<BUTTON_HEIGHT;y++) {
@@ -135,7 +152,7 @@ int main() {
 		}
 	}
 
-	free(bmp.data);                     /* free up memory used */
+	free(bmp.data);                     
 	
 	new_x=mouse.x;
 	new_y=mouse.y;
@@ -146,8 +163,8 @@ int main() {
 	//Inisialisasi Warna awal
 	P1 = Point(3,8);
 	P2 = Point(25,30);
-	fillRect(DoubleBuffer,P1,P2,color);
-	drawBuffer();
+	fillRect(P1,P2,color);
+	show_buffer(); // show the buffer	
 
 	while (!done) {                     // start main loop
 		if (redraw) {                   // draw the mouse only as needed
@@ -162,12 +179,13 @@ int main() {
 			mouse.x=new_x;
 			mouse.y=new_y;
 			show_mouse(&mouse);
-			drawBuffer();
+			show_buffer();
 			last_time=*my_clock;
 			redraw=0;
 			mouse_new=NULL;
 		}
 
+		
 		do {                              // check mouse status
 			get_mouse_motion(&dx,&dy);
 			press   = get_mouse_press(LEFT_BUTTON);
@@ -186,8 +204,7 @@ int main() {
 			if (new_y>199) new_y=199;
 			redraw=1;
 		}
-		
-		/******************************* Colour Picking *******************************/
+			
 		if (press && new_x >= 32 && new_x <= 188 && new_y >= 2 && new_y <= 36) {
 			if (new_x>=32 && new_x<=48 && new_y>=2 && new_y<=18)	color = BLACK;
 			else if (new_x>=52 && new_x<=68 && new_y>=2 && new_y<=18)	color = DARK_BLUE;
@@ -207,10 +224,10 @@ int main() {
 			else if (new_x>=172 && new_x<=188 && new_y>=20 && new_y<=36)	color = WHITE;
 			P1 = Point(3,8);
 			P2 = Point(25,30);
-			fillRect(DoubleBuffer,P1,P2,color);
-			drawBuffer();
+			fillRect(P1,P2,color);			
+			show_buffer();
 		}
-		/******************************* Mode Changing ********************************/
+		
 		if (press && new_x>=196 && new_x<=220 && new_y>=7 && new_y<31) {
 			hide_mouse(&mouse);
 			drawLineButton(STATE_PRESSED);
@@ -218,7 +235,7 @@ int main() {
 			drawCircleButton(STATE_NORM);
 			drawFillButton(STATE_NORM);
 			show_mouse(&mouse);
-			drawBuffer();
+			show_buffer();
 			CURRENT_MODE=line;
 		} else if (press && new_x>=224 && new_x<=248 && new_y>=7 && new_y<31) {
 			hide_mouse(&mouse);
@@ -226,16 +243,17 @@ int main() {
 			drawRectButton(STATE_PRESSED);
 			drawCircleButton(STATE_NORM);
 			drawFillButton(STATE_NORM);
-			show_mouse(&mouse);
-			drawBuffer();
+			show_mouse(&mouse);			
+			show_buffer();
 			CURRENT_MODE=rect;
 		}
-		/******************************* Drawing Method *******************************/
+		
+		/*	
 		if (CURRENT_MODE == line) { 
 			if (press && !draw_line_mode && new_x >= 0 && new_x < 320 && new_y > 40 && new_y < 200) {
 				P1.x=new_x; 	P1.y=new_y;
-				draw_line_mode=1;
-				drawBuffer();
+				draw_line_mode=1;				
+				show_buffer();
 			}		
 			if (release && draw_line_mode && new_x >= 0 && new_x < 320 && new_y > 40 && new_y < 200) {
 				P2.x=new_x; 	P2.y=new_y;
@@ -243,13 +261,14 @@ int main() {
 				OBJECT = Line(P1,P2,color);
 				drawObject(OBJECT);
 				Add(&LIST_OBJECT, OBJECT);
-				show_mouse(&mouse);
-				drawBuffer();
+				show_mouse(&mouse);				
+				show_buffer();
 				draw_line_mode=0;
 				enter_draw_mode=0;
 			}
 		}
 		
+		/*
 		if (CURRENT_MODE == rect) { 
 			if (press && !draw_line_mode && new_x >= 0 && new_x < 320 && new_y > 40 && new_y < 200) {
 				P1.x=new_x; 	P1.y=new_y;
@@ -293,9 +312,7 @@ int main() {
 		
 		if(CURRENT_MODE == fill) {
 		}
-		/******************************************************************************/
 		
-		/******************************************************************************/
 		for(i=0;i<NUM_BUTTONS;i++) {      // check button status
 			if (new_x >= button[i]->x && new_x < button[i]->x+48 && new_y >= button[i]->y && new_y < button[i]->y+24) {
 				if (release && button[i]->state==STATE_PRESSED) {
@@ -338,25 +355,27 @@ int main() {
 				redraw|=(2<<i);
 			}
 		}
+		*/
 	}                                   // end while loop
-
-	for (i=0; i<NUM_MOUSEBITMAPS; i++) {/* free allocated memory */
+	
+	/*
+	for (i=0; i<NUM_MOUSEBITMAPS; i++) {
 		free(mb[i]);
 	}
 
-	for (i=0; i<NUM_BUTTONS; i++) {     /* free allocated memory */
+	for (i=0; i<NUM_BUTTONS; i++) {     
 		free(button[i]);
 	}
 	
 	
-	set_mode(TEXT_MODE);                /* set the video mode back to
-                                         text mode. */
-										 
-	do{									/* free allocated memory*/	
+	set_mode(TEXT_MODE);                
+	
+	do{
 		Temp = LIST_OBJECT;
 		LIST_OBJECT = LIST_OBJECT->Next;
 		free(Temp);
 	}while(LIST_OBJECT != NULL);
-		
+	*/	
+	
 	return 0;
 }
