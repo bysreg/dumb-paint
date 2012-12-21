@@ -8,7 +8,6 @@ byte *canvas;
 letter* dict; // kamus huruf
 Matrix3x3 _transmat;
 
-
 void initDoubleBuffer() {
 	doubleBuffer = (byte *) malloc(320 * 200);	
 	if(doubleBuffer == NULL) {
@@ -467,10 +466,7 @@ void transformCanvas() {
 		for(x=0;x<SCREEN_WIDTH;x++) {
 			xbuf = x;
 			ybuf = y;
-			transformPoint2(&xbuf, &ybuf, _transmat);
-			//if(_transmat[0][0]==2) {
-				//printf("%d %d %d %d\n", x, y, xbuf, ybuf);
-			//}	
+			transformPoint2(&xbuf, &ybuf, _transmat);			
 			if(xbuf < SCREEN_WIDTH && ybuf < SCREEN_HEIGHT) {
 				doubleBuffer[(ybuf<<8) + (ybuf<<6) + xbuf] = getColor(x, y);	
 			}
