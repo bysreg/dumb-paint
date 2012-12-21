@@ -1,5 +1,5 @@
-#ifndef COLOR_H
-#define COLOR_H
+#ifndef LAYOUT_H
+#define LAYOUT_H
 
 #include "graphic.h"
 
@@ -105,7 +105,5 @@ void hide_mouse(MOUSE *mouse);
 void makeLayout();
 void drawLineButton(int state);
 void drawRectButton(int state);
-void drawCircleButton(int state);
-void drawFillButton(int state);
 
 #endif

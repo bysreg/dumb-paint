@@ -49,22 +49,6 @@ void main() {
 	
 	/************************************************************************************/
 	system("cls");
-	// printf("##################################################\n");
-	// printf("#                  16-BIT PAINT                  #\n");
-	// printf("##################################################\n");
-	// printf("to open existing file, type: open <filename>\n");
-	// printf("to create a fresh file, type: new <filename>\n");
-	// printf(">");
-	// scanf("%s %s", &command, &param);
-	// if (strcmp(command,"open")==0) {
-		// printf("File open: %s\n", param);
-		
-	// } else if (strcmp(command,"new")==0) {
-		// printf("Create new file: %s\n", param);
-	// } else {
-		// printf("Syntax error\n");
-		// exit(1);
-	// }
 		
 	//Inisialisasi Variable dasar
 	CURRENT_MODE = line;
@@ -106,7 +90,7 @@ void main() {
 	circleReference();
 	makeBuffer();
 	set_mode(VGA_256_COLOR_MODE);       /* set the video mode. */
-	// makeLayout();
+	makeLayout();
 	
 	for(i=0;i<NUM_MOUSEBITMAPS;i++) {   /* copy mouse pointers */
 		for(y=0;y<MOUSE_HEIGHT;y++) {
@@ -124,18 +108,18 @@ void main() {
 	mb[0]->hot_x = 7;
 	mb[0]->hot_y = 2;
 	
-	/* copy button bitmaps */
-	for(i=0;i<NUM_BUTTONS;i++) {
-		for(j=0;j<BUTTON_BITMAPS;j++) {
-			for(y=0;y<BUTTON_HEIGHT;y++) {
-				for(x=0;x<BUTTON_WIDTH;x++) {
-					button[i]->bitmap[j][x+y*BUTTON_WIDTH] =
-					bmp.data[i*(bmp.width>>1) + j*BUTTON_WIDTH + x +
-					(BUTTON_HEIGHT+y)*bmp.width];
-				}
-			}
-		}
-	}
+	// /* copy button bitmaps */
+	// for(i=0;i<NUM_BUTTONS;i++) {
+		// for(j=0;j<BUTTON_BITMAPS;j++) {
+			// for(y=0;y<BUTTON_HEIGHT;y++) {
+				// for(x=0;x<BUTTON_WIDTH;x++) {
+					// button[i]->bitmap[j][x+y*BUTTON_WIDTH] =
+					// bmp.data[i*(bmp.width>>1) + j*BUTTON_WIDTH + x +
+					// (BUTTON_HEIGHT+y)*bmp.width];
+				// }
+			// }
+		// }
+	// }
 
 	free(bmp.data);                     /* free up memory used */
 	
@@ -217,8 +201,8 @@ void main() {
 			hide_mouse(&mouse);
 			drawLineButton(STATE_PRESSED);
 			drawRectButton(STATE_NORM);
-			drawCircleButton(STATE_NORM);
-			drawFillButton(STATE_NORM);
+			// drawCircleButton(STATE_NORM);
+			// drawFillButton(STATE_NORM);
 			show_mouse(&mouse);
 			drawBuffer();
 			CURRENT_MODE=line;
@@ -226,8 +210,8 @@ void main() {
 			hide_mouse(&mouse);
 			drawLineButton(STATE_NORM);
 			drawRectButton(STATE_PRESSED);
-			drawCircleButton(STATE_NORM);
-			drawFillButton(STATE_NORM);
+			// drawCircleButton(STATE_NORM);
+			// drawFillButton(STATE_NORM);
 			show_mouse(&mouse);
 			drawBuffer();
 			CURRENT_MODE=rect;
@@ -271,75 +255,51 @@ void main() {
 			}
 		}
 		
-		if (CURRENT_MODE == circle) { 
-			if (press && !draw_line_mode && new_x >= 0 && new_x < 320 && new_y > 40 && new_y < 200) {
-				P1.x=new_x; 	P1.y=new_y;
-				draw_line_mode=1;
-				drawBuffer();
-			}		
-			if (release && draw_line_mode && new_x >= 0 && new_x < 320 && new_y > 40 && new_y < 200) {
-				P2.x=new_x; 	P2.y=new_y;
-				radius=sqrt(pow(P2.x-P1.x,2)+pow(P2.y-P1.y,2))/2;
-				P1.x=(P1.x+P2.x)/2;
-				P1.y=(P1.y+P2.y)/2;
-				hide_mouse(&mouse);
-				OBJECT = Circle(P1,radius,color);
-				drawObject(OBJECT);
-				Add(&LIST_OBJECT, OBJECT);
-				show_mouse(&mouse);
-				drawBuffer();
-				draw_line_mode=0;
-				draw_rect_mode=0;
-			}
-		}
+		// // /******************************************************************************/
 		
-		if(CURRENT_MODE == fill) {
-		}
-		/******************************************************************************/
-		
-		/******************************************************************************/
-		for(i=0;i<NUM_BUTTONS;i++) {      // check button status
-			if (new_x >= button[i]->x && new_x < button[i]->x+48 && new_y >= button[i]->y && new_y < button[i]->y+24) {
-				if (release && button[i]->state==STATE_PRESSED) {
-				//Handle a currently pressed button
-					button[i]->state=STATE_ACTIVE;
-					redraw|=(2<<i);
-					if (i==0) {					// Button draw
-						CURRENT_MODE = line;
-						//draw_circle_mode=1;
-					} else if (i==1) {			// Button exit
-						done=1;
-					}
-				}
-				else if (press) {
-				//Handle not pressed button, if pressed, do this
-					button[i]->state=STATE_PRESSED;
-					redraw|=(2<<i);
-				} else if (button[i]->state==STATE_NORM && mouse.button1==0) {
-					button[i]->state=STATE_ACTIVE;
-					redraw|=(2<<i);
-				} else if (button[i]->state==STATE_WAITING) {
-					if (mouse.button1) {
-						button[i]->state=STATE_PRESSED;
-					} else {
-						button[i]->state=STATE_ACTIVE;
-					}
-					redraw|=(2<<i);
-				}
-			}
-			else if (button[i]->state==STATE_ACTIVE) {
-				button[i]->state=STATE_NORM;
-				redraw|=(2<<i);
-			}
-			else if (button[i]->state==STATE_PRESSED && mouse.button1) {
-				button[i]->state=STATE_WAITING;
-				redraw|=(2<<i);
-			}
-			else if (button[i]->state==STATE_WAITING && release) {
-				button[i]->state=STATE_NORM;
-				redraw|=(2<<i);
-			}
-		}
+		// // /******************************************************************************/
+		// for(i=0;i<NUM_BUTTONS;i++) {      // check button status
+			// if (new_x >= button[i]->x && new_x < button[i]->x+48 && new_y >= button[i]->y && new_y < button[i]->y+24) {
+				// if (release && button[i]->state==STATE_PRESSED) {
+				// //Handle a currently pressed button
+					// button[i]->state=STATE_ACTIVE;
+					// redraw|=(2<<i);
+					// if (i==0) {					// Button draw
+						// CURRENT_MODE = line;
+						// //draw_circle_mode=1;
+					// } else if (i==1) {			// Button exit
+						// done=1;
+					// }
+				// }
+				// else if (press) {
+				// //Handle not pressed button, if pressed, do this
+					// button[i]->state=STATE_PRESSED;
+					// redraw|=(2<<i);
+				// } else if (button[i]->state==STATE_NORM && mouse.button1==0) {
+					// button[i]->state=STATE_ACTIVE;
+					// redraw|=(2<<i);
+				// } else if (button[i]->state==STATE_WAITING) {
+					// if (mouse.button1) {
+						// button[i]->state=STATE_PRESSED;
+					// } else {
+						// button[i]->state=STATE_ACTIVE;
+					// }
+					// redraw|=(2<<i);
+				// }
+			// }
+			// else if (button[i]->state==STATE_ACTIVE) {
+				// button[i]->state=STATE_NORM;
+				// redraw|=(2<<i);
+			// }
+			// else if (button[i]->state==STATE_PRESSED && mouse.button1) {
+				// button[i]->state=STATE_WAITING;
+				// redraw|=(2<<i);
+			// }
+			// else if (button[i]->state==STATE_WAITING && release) {
+				// button[i]->state=STATE_NORM;
+				// redraw|=(2<<i);
+			// }
+		// }
 	}                                   // end while loop
 
 	for (i=0; i<NUM_MOUSEBITMAPS; i++) {/* free allocated memory */

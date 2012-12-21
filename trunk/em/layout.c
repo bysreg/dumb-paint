@@ -234,26 +234,6 @@ void makeLayout() {
 	fillRect(DoubleBuffer,P1,P2,GRAY);
 	drawRect(DoubleBuffer,P1,P2,WHITE);
 	drawRect(DoubleBuffer,P3,P4,BROWN);
-	
-	//drawCircle Button
-	P1.x += 28;
-	P2.x += 28;
-	P3 = Point(264,19);
-	fillRect(DoubleBuffer,P1,P2,GRAY);
-	drawRect(DoubleBuffer,P1,P2,WHITE);
-	drawCircle(DoubleBuffer,P3,8,BROWN);
-	
-	//fill Button
-	P1.x += 28;
-	P2.x += 28;
-	fillRect(DoubleBuffer,P1,P2,GRAY);
-	drawRect(DoubleBuffer,P1,P2,WHITE);
-	P1 = Point(286,15);
-	P2 = Point(298,28);
-	P3 = Point(292,15);
-	drawCircle(DoubleBuffer,P3,7,BROWN);
-	fillRect(DoubleBuffer,P1,P2,DARK_GRAY);
-	drawRect(DoubleBuffer,P1,P2,WHITE);
 		
 	//exit Button
 	P1 = Point(310,0);
@@ -265,39 +245,7 @@ void makeLayout() {
 	P4 = Point(312,7);
 	drawLine(DoubleBuffer,P1,P2,WHITE);
 	drawLine(DoubleBuffer,P3,P4,WHITE);
-		
-	//help Button
-	P1 = Point(314,17);
-	fillCircle(DoubleBuffer,P1,6,DARK_BLUE);
-	P1 = Point(314,13);
-	P2 = Point(315,14);
-	P3 = Point(314,16);
-	P4 = Point(315,21);
-	fillRect(DoubleBuffer,P1,P2,WHITE);
-	fillRect(DoubleBuffer,P3,P4,WHITE);
 	
-	//Scrollbar
-	P1 = Point(310,41);
-	P2 = Point(319,199);
-	P3 = Point(319,51);
-	P4 = Point(310,189);
-	fillRect(DoubleBuffer,P1,P2,GRAY);
-	fillRect(DoubleBuffer,P1,P3,DARK_GRAY);
-	fillRect(DoubleBuffer,P4,P2,DARK_GRAY);
-	P1 = Point(314,42);
-	P2 = Point(317,50);
-	P3 = Point(311,50);
-	P4 = Point(315,45);
-	drawLine(DoubleBuffer,P1,P2,BLACK);
-	drawLine(DoubleBuffer,P2,P3,BLACK);
-	drawLine(DoubleBuffer,P3,P1,BLACK);
-	P1 = Point(314,198);
-	P2 = Point(317,190);
-	P3 = Point(311,190);
-	P4 = Point(315,195);
-	drawLine(DoubleBuffer,P1,P2,BLACK);
-	drawLine(DoubleBuffer,P2,P3,BLACK);
-	drawLine(DoubleBuffer,P3,P1,BLACK);
 	//Final State
 	drawBuffer();
 }
@@ -332,38 +280,4 @@ void drawRectButton(int state) {
 		drawRect(DoubleBuffer,P1,P2,WHITE);
 		drawRect(DoubleBuffer,P3,P4,BROWN);
 	}
-}
-
-void drawCircleButton(int state) {
-	point P1 = {252,7};
-	point P2 = {276,31};
-	point P3 = {264,19};
-	if (state==STATE_NORM) {
-		fillRect(DoubleBuffer,P1,P2,GRAY);
-		drawRect(DoubleBuffer,P1,P2,WHITE);
-		drawCircle(DoubleBuffer,P3,8,BROWN);
-	} else if (state==STATE_PRESSED) {
-		fillRect(DoubleBuffer,P1,P2,CYAN);
-		drawRect(DoubleBuffer,P1,P2,WHITE);
-		drawCircle(DoubleBuffer,P3,8,BROWN);
-	}
-}
-
-void drawFillButton(int state) {
-	point P1 = {280,7},
-		  P2 = {304,31},
-		  P3;
-	if (state==STATE_NORM) {
-		fillRect(DoubleBuffer,P1,P2,GRAY);
-		drawRect(DoubleBuffer,P1,P2,WHITE);
-	} else if (state==STATE_PRESSED) {
-		fillRect(DoubleBuffer,P1,P2,CYAN);
-		drawRect(DoubleBuffer,P1,P2,WHITE);
-	}
-	P1 = Point(286,15);
-	P2 = Point(298,28);
-	P3 = Point(292,15);
-	drawCircle(DoubleBuffer,P3,7,BROWN);
-	fillRect(DoubleBuffer,P1,P2,DARK_GRAY);
-	drawRect(DoubleBuffer,P1,P2,WHITE);
 }

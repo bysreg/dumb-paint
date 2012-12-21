@@ -134,28 +134,28 @@ void drawCircle(byte* Buffer, point P, int radius, byte color) {
 	}
 }
 
-void fillCircle(byte* Buffer, point P, int radius, byte color) {
-	fixed16_16 	n=0,
-				invradius=(1/(float)radius)*0x10000L;
-	int 		dx=0,
-				dy=radius-1,i;
-	word 		dxoffset,dyoffset,offset = (P.y<<8)+(P.y<<6)+P.x;
+// void fillCircle(byte* Buffer, point P, int radius, byte color) {
+	// fixed16_16 	n=0,
+				// invradius=(1/(float)radius)*0x10000L;
+	// int 		dx=0,
+				// dy=radius-1,i;
+	// word 		dxoffset,dyoffset,offset = (P.y<<8)+(P.y<<6)+P.x;
 
-	while (dx<=dy) {
-		dxoffset = (dx<<8) + (dx<<6);
-		dyoffset = (dy<<8) + (dy<<6);
-		for(i=dy;i>=dx;i--,dy--) {
-			draw_pixel(DoubleBuffer, P.x-dx, P.y+i,  color);	/* octant 0 */
-			draw_pixel(DoubleBuffer, P.x-dy, P.y+dx, color);	/* octant 1 */
-			draw_pixel(DoubleBuffer, P.x-dy, P.y-dx, color);	/* octant 2 */
-			draw_pixel(DoubleBuffer, P.x-dx, P.y-i,  color);	/* octant 3 */
-			draw_pixel(DoubleBuffer, P.x+dx, P.y-i,  color);	/* octant 4 */
-			draw_pixel(DoubleBuffer, P.x+dy, P.y-dx, color);	/* octant 5 */
-			draw_pixel(DoubleBuffer, P.x+dy, P.y+dx, color);	/* octant 6 */
-			draw_pixel(DoubleBuffer, P.x+dx, P.y+i,  color);	/* octant 7 */
-		}
-		dx++;
-		n+=invradius;
-		dy = (int)((radius * SIN_ACOS[(int)(n>>6)]) >> 16);
-	}
-}
+	// while (dx<=dy) {
+		// dxoffset = (dx<<8) + (dx<<6);
+		// dyoffset = (dy<<8) + (dy<<6);
+		// for(i=dy;i>=dx;i--,dy--) {
+			// draw_pixel(DoubleBuffer, P.x-dx, P.y+i,  color);	/* octant 0 */
+			// draw_pixel(DoubleBuffer, P.x-dy, P.y+dx, color);	/* octant 1 */
+			// draw_pixel(DoubleBuffer, P.x-dy, P.y-dx, color);	/* octant 2 */
+			// draw_pixel(DoubleBuffer, P.x-dx, P.y-i,  color);	/* octant 3 */
+			// draw_pixel(DoubleBuffer, P.x+dx, P.y-i,  color);	/* octant 4 */
+			// draw_pixel(DoubleBuffer, P.x+dy, P.y-dx, color);	/* octant 5 */
+			// draw_pixel(DoubleBuffer, P.x+dy, P.y+dx, color);	/* octant 6 */
+			// draw_pixel(DoubleBuffer, P.x+dx, P.y+i,  color);	/* octant 7 */
+		// }
+		// dx++;
+		// n+=invradius;
+		// dy = (int)((radius * SIN_ACOS[(int)(n>>6)]) >> 16);
+	// }
+// }
