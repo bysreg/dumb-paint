@@ -1,8 +1,6 @@
 #include "graphic.h"
 
-int main() {
-	
-	word x,y;	
+int main() {	
 	BITMAP bmp;	
 	vec2 polypoints[3];	
 	int i, j = 0;	
@@ -77,6 +75,12 @@ int main() {
 	p4.y = SCREEN_HEIGHT / 2;	
 	createBezier4(points, p1, p2, p3, p4, 0.01);		
 	drawPolygonp(points, 100, 14);
+	show_buffer(); // show the buffer			
+	getch();
+	
+	// TEST 8. kotak	
+	memset(canvas,0,SCREEN_SIZE);	
+	drawRect(0, 0, 100, 100, 2);
 	show_buffer(); // show the buffer			
 	getch();
 	
